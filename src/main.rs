@@ -30,7 +30,10 @@ fn main() {
             .expect("Could not read line");
         let selection: i8 = match selection.trim().parse() {
             Ok(num) => num,
-            Err(_) => continue,
+            Err(e) => {
+                println!("Error: {}\n", e);
+                continue;
+            }
         };
 
         match selection {
@@ -41,8 +44,11 @@ fn main() {
                     .read_line(&mut name)
                     .expect("Could not read name");
 
-                let _ = session.register_voter(name);
-                println!("User registerd sucessfully \n");
+                // This is necessary to ensure that errors are properly handled and displayed
+                match session.register_voter(name) {
+                    Ok(_) => println!("User registerd sucessfully \n"),
+                    Err(e) => println!("Error: {}\n", e),
+                }
             }
 
             2 => {
@@ -54,7 +60,10 @@ fn main() {
 
                 let voter_id: i32 = match voter_id.trim().parse() {
                     Ok(num) => num,
-                    Err(_) => continue,
+                    Err(e) => {
+                        println!("Error: {}\n", e);
+                        continue;
+                    }
                 };
 
                 println!("Enter the id of the proposal you want to vote for");
@@ -64,7 +73,10 @@ fn main() {
                     .expect("Could not read proposal_id");
                 let proposal_id: i32 = match proposal_id.trim().parse() {
                     Ok(num) => num,
-                    Err(_) => continue,
+                    Err(e) => {
+                        println!("Error: {}\n", e);
+                        continue;
+                    }
                 };
 
                 println!("Enter how many credits you want to vote with");
@@ -74,11 +86,15 @@ fn main() {
                     .expect("Could not read voter_credits");
                 let voter_credits: i32 = match voter_credits.trim().parse() {
                     Ok(num) => num,
-                    Err(_) => continue,
+                    Err(e) => {
+                        println!("Error: {}\n", e);
+                        continue;
+                    }
                 };
-                let _ = session.vote(voter_id, proposal_id, voter_credits);
-
-                println!("Voted sucessfully\n");
+                match session.vote(voter_id, proposal_id, voter_credits){
+                    Ok(_) => println!("Voted sucessfully\n"),
+                    Err(e) => println!("Error: {} \n", e)
+                }  
             }
 
             3 => {

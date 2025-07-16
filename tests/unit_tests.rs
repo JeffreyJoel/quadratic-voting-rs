@@ -1,6 +1,7 @@
 use quadratic_voting_rs::*;
 
 /// Happy paths
+/// Add a setup function for this
 #[test]
 fn test_create_session() {
     let session = Session::create_session(100);
