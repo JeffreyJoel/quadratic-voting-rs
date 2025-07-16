@@ -80,10 +80,6 @@ impl Session {
         self.next_voter_id += 1;
         let voter_id = self.next_voter_id;
 
-        if self.is_active {
-            return Err("Session is already active.".to_string());
-        }
-
         if name.is_empty() {
             return Err("Voter name cannot be empty".to_string());
         }
@@ -117,6 +113,10 @@ impl Session {
         if vote_credits <= 0 {
             return Err("You cannot vote with zero credits".to_string());
         }
+
+        if *self.proposals[proposal_id].user_voted.get(&voter_id).unwrap() {
+            return Err("You have already voted".to_string());
+        } 
 
         self.voters.get_mut(&voter_id).unwrap().credits -= vote_credits;
 
