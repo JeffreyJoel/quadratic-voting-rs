@@ -6,13 +6,14 @@ pub struct Session {
     pub proposals: Vec<Proposal>,
     pub voters: HashMap<i32, Voter>,
     pub next_voter_id: i32,
-    pub votes: HashMap<(i32, usize), Vote>,
+    pub next_proposal_id: i32,
+    pub votes: HashMap<(i32, i32), Vote>,
     pub is_active: bool,
 }
 
 #[derive(Debug)]
 pub struct Proposal {
-    pub id: usize,
+    pub id: i32,
     pub title: String,
     pub description: String,
     pub total_votes: f64,
@@ -29,7 +30,7 @@ pub struct Voter {
 #[derive(Debug)]
 pub struct Vote {
     pub voter_id: i32,
-    pub proposal_id: usize,
+    pub proposal_id: i32,
     pub credits_spent: i32,
     pub vote_count: f64,
 }
@@ -41,6 +42,7 @@ impl Session {
             proposals: vec![],
             voters: HashMap::new(),
             next_voter_id: 0,
+            next_proposal_id: 0,
             votes: HashMap::new(),
             is_active: false,
         }
@@ -55,7 +57,8 @@ impl Session {
     }
 
     pub fn add_proposal(&mut self, title: String, description: String) -> Result<(), String> {
-        let proposal_id = self.proposals.len();
+        self.next_proposal_id += 1;
+        let proposal_id =self.next_proposal_id;
 
         if self.is_active {
             return Err("Cannot add proposal after session has started".to_string());
@@ -100,9 +103,14 @@ impl Session {
     pub fn vote(
         &mut self,
         voter_id: i32,
-        proposal_id: usize,
+        proposal_id: i32,
         vote_credits: i32,
     ) -> Result<(), String> {
+
+        let proposal = self.proposals.iter_mut()
+        .find(|p| p.id == proposal_id)
+        .ok_or("Proposal not found")?;        
+
         if !self.voters.contains_key(&voter_id) {
             return Err("You are not a voter".to_string());
         }
@@ -114,16 +122,19 @@ impl Session {
             return Err("You cannot vote with zero credits".to_string());
         }
 
-        if *self.proposals[proposal_id].user_voted.get(&voter_id).unwrap() {
+        // For future ref: This checks if a voter's id exists in the user_voted map. 
+        // It does not actually check if the bool value is true or false
+        //The reason for this is that baed on our impl, a user is only added to the map if they have voted.
+        if proposal.user_voted.contains_key(&voter_id) {
             return Err("You have already voted".to_string());
         } 
 
         self.voters.get_mut(&voter_id).unwrap().credits -= vote_credits;
 
-        self.proposals[proposal_id].user_voted.insert(voter_id, true);
+        proposal.user_voted.insert(voter_id, true);
 
         let vote_count = (vote_credits as f64).sqrt();
-        self.proposals[proposal_id].total_votes += vote_count;
+        proposal.total_votes += vote_count;
         
         let vote_key = (voter_id, proposal_id);
         let vote = Vote {
@@ -137,7 +148,7 @@ impl Session {
         Ok(())
     }
 
-    pub fn get_voter_votes(&self, voter_id: i32, proposal_id: usize) -> f64 {
+    pub fn get_voter_votes(&self, voter_id: i32, proposal_id: i32) -> f64 {
         self.votes
             .get(&(voter_id, proposal_id))
             .map(|v| v.vote_count)

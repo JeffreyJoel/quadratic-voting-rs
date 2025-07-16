@@ -62,7 +62,7 @@ fn main() {
                 io::stdin()
                     .read_line(&mut proposal_id)
                     .expect("Could not read proposal_id");
-                let proposal_id: usize = match proposal_id.trim().parse() {
+                let proposal_id: i32 = match proposal_id.trim().parse() {
                     Ok(num) => num,
                     Err(_) => continue,
                 };
