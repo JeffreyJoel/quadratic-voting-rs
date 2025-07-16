@@ -117,7 +117,6 @@ This creates a natural balance where intense preferences can be expressed, but a
 - **No Data Persistence**: All data is lost when the application exits
 - **Fixed Proposals**: Proposals are hard-coded and cannot be changed during runtime
 - **No Vote Updates**: Voters cannot modify their votes once cast
-- **Console Only**: No graphical user interface
 - **Basic Input Validation**: Limited error checking for user inputs
 
 
